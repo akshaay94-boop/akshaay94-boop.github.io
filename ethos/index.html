@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#140a31">
+<meta name="robots" content="noindex,nofollow">
+<title>Our Ethos · Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* IHC dark: one screen that follows the wall. Indigo ground, gold for choices, aqua for live state */
+:root{--ink:#140a31;--ink2:#1f1150;--gold:#c4a468;--gold2:#e3bf78;--ivory:#f6f1e6;--aqua:#01eaff;--green:#00e10a;--red:#e70053;--muted:rgba(255,255,255,.7);--faint:rgba(255,255,255,.45);--line:rgba(255,255,255,.16);--f:'Cairo',Arial,sans-serif;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--ink);color:#fff;font-family:var(--f);-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(ellipse 120% 60% at 50% 0%,#2a1660 0%,var(--ink) 60%) fixed;min-height:100vh;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) max(18px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(18px,env(safe-area-inset-left,0px))}
+header{display:flex;align-items:center;gap:12px;padding:16px 0 14px;border-bottom:1px solid var(--line)}
+header img{width:34px;height:auto}
+header .t{font:800 18px/1 var(--f);letter-spacing:.02em;flex:1}
+.pill[hidden]{display:none}
+.pill{display:flex;align-items:center;gap:8px;font:700 13px/1 var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pill:before{content:'';width:9px;height:9px;border-radius:50%;background:#ffb200;animation:blink 1s infinite}
+.pill.live:before{background:var(--green);box-shadow:0 0 10px var(--green);animation:none}
+@keyframes blink{50%{opacity:.3}}
+main{flex:1;padding:26px 0 20px;display:flex;flex-direction:column;gap:18px;max-width:560px;width:100%;margin:0 auto}
+footer{font:600 13px/1.4 var(--f);color:var(--faint);text-align:center;padding:14px 0 18px;border-top:1px solid var(--line)}
+.kick{font:700 13px/1 var(--f);letter-spacing:.2em;text-transform:uppercase;color:var(--aqua)}
+h1{font:800 27px/1.2 var(--f);text-wrap:balance}
+h1.big{font-size:40px;line-height:1.1}
+p,.note{font:400 17px/1.45 var(--f);color:var(--muted)}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{width:100%;min-height:58px;padding:14px 18px;border-radius:16px;border:2px solid rgba(227,191,120,.45);background:rgba(255,255,255,.04);color:#fff;font:700 19px/1.25 var(--f);text-align:left;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s,border-color .15s,transform .1s}
+.opt:active{transform:scale(.98)}
+.opt .box{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid rgba(227,191,120,.7)}
+.opt.multi .box{border-radius:7px}
+.opt[aria-pressed=true]{background:var(--gold2);border-color:var(--gold2);color:var(--ink)}
+.opt[aria-pressed=true] .box{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 5px var(--gold2)}
+.opt:disabled{opacity:.35}
+.sent{font:700 15px/1 var(--f);color:var(--faint);min-height:18px}
+.sent.ok{color:var(--green)}
+input[type=text]{width:100%;font:700 22px/1.2 var(--f);padding:16px 18px;border-radius:14px;border:2px solid rgba(227,191,120,.5);background:rgba(255,255,255,.06);color:#fff;outline:none}
+input[type=text]:focus{border-color:var(--gold2);background:rgba(255,255,255,.1)}
+input::placeholder{color:var(--faint)}
+.btn{width:100%;min-height:56px;border:0;border-radius:16px;background:var(--aqua);color:var(--ink);font:900 19px/1 var(--f);letter-spacing:.02em;cursor:pointer}
+.btn:disabled{opacity:.4}
+.btn.ghost{background:transparent;color:var(--muted);border:2px solid var(--line);font-weight:700}
+.btn:focus-visible,.opt:focus-visible,.tb:focus-visible,.qb:focus-visible{outline:3px solid var(--aqua);outline-offset:2px}
+.hero{display:flex;flex-direction:column;gap:14px;padding:24px 0 8px}
+.ring{width:66px;height:66px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font:900 30px/1 var(--f);color:var(--gold2)}
+.tables{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.tb{aspect-ratio:1;border-radius:12px;border:2px solid rgba(227,191,120,.45);background:rgba(255,255,255,.04);color:#fff;font:800 20px/1 var(--f);cursor:pointer}
+.tb[aria-pressed=true]{background:var(--gold2);color:var(--ink);border-color:var(--gold2)}
+.tb:disabled{opacity:.25;text-decoration:line-through}
+.err{font:700 15px/1.4 var(--f);color:#ff8fb1}
+.qgrid{display:grid;grid-template-columns:1fr;gap:10px}
+.qb{min-height:68px;border:0;border-radius:16px;display:flex;align-items:center;gap:14px;padding:12px 16px;font:800 19px/1.2 var(--f);text-align:left;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:transform .1s,opacity .3s}
+.qb:active{transform:scale(.97)}
+.qb svg{flex:none}
+.qb.dim{opacity:.25}
+.bar{height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--aqua);transform-origin:left;transition:background .3s}
+.res{border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.res.good{background:rgba(0,225,10,.14);border:2px solid rgba(0,225,10,.6)}
+.res.bad{background:rgba(231,0,83,.14);border:2px solid rgba(231,0,83,.6)}
+.res .pts{font:900 44px/1 var(--f)}
+.stat{display:flex;gap:10px}
+.stat div{flex:1;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.stat b{display:block;font:900 26px/1.1 var(--f)}
+.stat span{font:600 13px/1.2 var(--f);color:var(--faint);text-transform:uppercase;letter-spacing:.1em}
+.banner{font:700 14px/1.3 var(--f);color:var(--ink);background:#ffb200;border-radius:10px;padding:10px 14px}
+.link{background:none;border:0;color:var(--aqua);font:700 16px/1.3 var(--f);text-decoration:underline;cursor:pointer;align-self:flex-start;padding:4px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><img src="ihc_white.png" alt="IHC"><div class="t">Our Ethos · Live</div><div class="pill" id="pill" hidden>Connecting</div></header>
+<main id="app"></main>
+<footer>Anonymous. No names, no sign-in. IHC Townhall 2026.</footer>
+<script src="live_core.js"></script>
+<script>
+(function () {
+  const app = document.getElementById('app'), pill = document.getElementById('pill');
+  const el = (tag, a = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(a)) { if (v == null || v === false) continue; if (k === 'cls') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? '' : v); } kids.flat().forEach(c => c != null && e.append(c.nodeType ? c : document.createTextNode(String(c)))); return e; };
+  const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+  const put = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+  const COL = [['#e70053', '#fff', '<polygon points="50,8 94,88 6,88"/>'], ['#4387f0', '#fff', '<polygon points="50,4 96,50 50,96 4,50"/>'], ['#ffb200', '#140a31', '<circle cx="50" cy="50" r="44"/>'], ['#00c853', '#0b1d10', '<rect x="10" y="10" width="80" height="80" rx="6"/>'], ['#9933cc', '#fff', '<polygon points="50,5 62,38 97,38 69,59 79,93 50,72 21,93 31,59 3,38 38,38"/>']];
+  const shape = (i, px) => `<svg viewBox="0 0 100 100" width="${px}" height="${px}" fill="${COL[i][1]}">${COL[i][2]}</svg>`;
+  const ord = n => n + (['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 100 < 14) ? 0 : Math.min(n % 10, 4) % 4] || 'th');
+
+  let code = LiveCore.cleanCode(decodeURIComponent(location.hash.slice(1)));
+  let U = get('oe.u'); if (!U) { U = LiveCore.rid(10); put('oe.u', U); }
+  let link = null, S = null, lastV = 0, heard = 0, view = '', ups = 0, deadline = 0, raf = 0;
+  const out = new Map(); // messages repeated until the wall confirms them
+  const K = s => 'oe.' + code + '.' + s;
+
+  function want(key, msg, done) { out.set(key, { msg, done }); flush(); }
+  function flush() { if (!link) return; out.forEach((o, k) => { if (S && o.done(S)) out.delete(k); else link.send(o.msg); }); }
+  function wake() { try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => { }); } catch (e) { } }
+  document.addEventListener('click', wake, { once: true });
+
+  /* ---------- no code yet ---------- */
+  function askCode(err) {
+    app.innerHTML = '';
+    const inp = el('input', { type: 'text', id: 'code', maxlength: 6, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: 'Code on the screen', 'aria-label': 'Join code' });
+    const go = () => { const c = LiveCore.cleanCode(inp.value); if (c.length !== 6) return askCode('The code has six letters and numbers.'); code = c; try { history.replaceState(null, '', '#' + c); } catch (e) { } start(); };
+    app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'Join in'), el('h1', { cls: 'big' }, 'Enter the code on the wall.')), inp, el('div', { cls: 'err' }, err || ''), el('button', { cls: 'btn', onclick: go }, 'Join'));
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  }
+
+  async function start() {
+    pill.hidden = false;
+    app.innerHTML = ''; app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'Code ' + code), el('h1', { cls: 'big' }, 'Connecting to the wall…'), el('p', {}, 'This takes a few seconds.')));
+    try {
+      link = await LiveCore.connect(code, 'phone', { message: onState, status: (up) => { ups = up; pill.textContent = up ? 'Live' : 'Connecting'; pill.className = 'pill' + (up ? ' live' : ''); if (up) { hello(); flush(); } } });
+    } catch (e) { app.innerHTML = ''; app.append(el('h1', {}, 'This browser cannot join.'), el('p', {}, 'Please open this page in Safari or Chrome.')); return; }
+    setInterval(hello, 25000); setInterval(flush, 2500); setInterval(stale, 4000);
+    setTimeout(() => { if (!S) { view = ''; render(); } }, 9000);
+  }
+  function hello() { link && link.send({ t: 'hi', u: U }); }
+  function stale() { const b = document.getElementById('stale'); const off = S && Date.now() - heard > 40000; if (off && !b) app.prepend(el('div', { cls: 'banner', id: 'stale' }, 'Waiting for the wall…')); if (!off && b) b.remove(); }
+
+  function onState(s) { if (!s || !s.v || s.v <= lastV) return; lastV = s.v; S = s; heard = Date.now(); if (s.quiz && s.quiz.phase === 'open') deadline = Date.now() + (s.quiz.left || 0); render(); flush(); }
+
+  /* ---------- screens ---------- */
+  const myTeam = () => { const t = get(K('team')); return t && S && S.teams && S.teams.find(x => x[0] === t.tid && x[1] === t.tb) ? t : null; };
+  function render() {
+    const s = S || { mode: 'none' }, q = s.quiz || {}, team = myTeam();
+    const key = [s.mode, s.poll && s.poll.id, q.qi, q.phase, team ? 'T' : get(K('watch')) ? 'W' : '-', s.final && s.final.stage].join('|');
+    if (key === view) return patch();
+    view = key; cancelAnimationFrame(raf); app.innerHTML = '';
+    const st = document.getElementById('stale'); if (st) st.remove();
+    if (s.mode === 'poll') return pollView(s.poll);
+    if (s.mode === 'lobby' || s.mode === 'quiz' || s.mode === 'final') return gameView(s, team);
+    if (s.mode === 'none') return waitView(ups ? 'Waiting for the wall' : 'Still connecting', ups ? 'The wall has not opened a question yet. Keep this page open.' : 'If this does not change, check your internet connection.');
+    if (s.mode === 'join') return waitView('You’re in.', 'Questions appear here when the wall asks. Keep this page open.');
+    waitView('Eyes on the wall.', 'The next question will appear here on its own.');
+  }
+  let patchers = [];
+  function patch() { patchers.forEach(f => f()); }
+  function waitView(t, p) { patchers = []; app.append(el('div', { cls: 'hero' }, el('div', { cls: 'ring' }, '✓'), el('h1', { cls: 'big' }, t), el('p', {}, p))); }
+
+  /* ---------- polls ---------- */
+  function pollView(P) {
+    patchers = [];
+    const saved = get(K('p.' + P.id)) || { s: 0 }; let sel = saved.c || [];
+    const sent = el('div', { cls: 'sent' });
+    const ack = () => { const cur = get(K('p.' + P.id)); if (!cur || !cur.s) { sent.textContent = ''; return; } const ok = (S.poll && S.poll.id === P.id && (S.poll.ack || []).includes(U + '.' + cur.s)); sent.textContent = ok ? '✓ Sent' : 'Sending…'; sent.className = 'sent' + (ok ? ' ok' : ''); };
+    const send = body => { const s = (get(K('p.' + P.id)) || { s: 0 }).s + 1; const rec = Object.assign({ s }, body); put(K('p.' + P.id), rec); const msg = Object.assign({ t: P.kind === 'open' ? 'x' : 'v', u: U, p: P.id, s }, P.kind === 'open' ? { x: body.x } : { c: body.c }); want('poll', msg, st => !st.poll || st.poll.id !== P.id || (st.poll.ack || []).includes(U + '.' + s)); ack(); };
+    app.append(el('div', { cls: 'kick' }, 'Live poll · anonymous'), el('h1', {}, P.q));
+    if (P.kind === 'open') {
+      const inp = el('input', { type: 'text', id: 'ans-' + P.id, maxlength: P.len || 40, placeholder: P.hint || 'Your answer', autocomplete: 'off', 'aria-label': 'Your answer' }); if (saved.x) inp.value = saved.x;
+      const go = () => { const x = inp.value.replace(/\s+/g, ' ').trim(); if (!x) return inp.focus(); send({ x }); inp.blur(); };
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+      app.append(inp, el('button', { cls: 'btn', onclick: go }, 'Send'), sent, el('p', { cls: 'note' }, 'Send again to replace your answer.'));
+    } else {
+      const multi = P.kind === 'multi', max = P.max || 1, btns = [];
+      const paint = () => btns.forEach((b, i) => b.setAttribute('aria-pressed', sel.includes(i)));
+      let tm;
+      P.opts.forEach((t, i) => { const b = el('button', { cls: 'opt' + (multi ? ' multi' : ''), 'aria-pressed': 'false', onclick: () => {
+        if (multi) { sel = sel.includes(i) ? sel.filter(x => x !== i) : [...sel, i].slice(-max); paint(); clearTimeout(tm); if (sel.length) tm = setTimeout(() => send({ c: sel.slice() }), 450); }
+        else { sel = [i]; paint(); send({ c: [i] }); }
+      } }, el('span', { cls: 'box' }), t); btns.push(b); });
+      paint(); app.append(el('div', { cls: 'opts' }, btns), sent, el('p', { cls: 'note' }, multi ? `Pick up to ${max}. You can change your mind while the poll is open.` : 'Tap to change your answer while the poll is open.'));
+    }
+    ack(); patchers.push(ack);
+  }
+
+  /* ---------- the quiz ---------- */
+  function gameView(s, team) {
+    patchers = [];
+    if (!team && !get(K('watch'))) return joinTeam(s);
+    if (s.mode === 'lobby') {
+      if (team) return app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', { cls: 'big' }, `Table ${team.tb} is in.`), el('p', {}, (team.nm ? team.nm + '. ' : '') + 'Get ready. The fastest right answer scores the most.')));
+      return watching();
+    }
+    if (s.mode === 'final') {
+      const r = team && s.final && s.final.res[team.tid];
+      if (!s.final || s.final.stage < 3 || !r) return app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', { cls: 'big' }, s.final && s.final.stage >= 3 ? 'Congratulations to the winners!' : 'Drumroll…'), el('p', {}, 'Eyes on the wall.')));
+      return app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'Final result'), el('h1', { cls: 'big' }, r[1] === 1 ? 'Your table won!' : `Your table finished ${ord(r[1])}.`), el('div', { cls: 'stat' }, el('div', {}, el('b', {}, r[0].toLocaleString('en-US')), el('span', {}, 'Points')), el('div', {}, el('b', {}, ord(r[1])), el('span', {}, 'Place')))));
+    }
+    const q = s.quiz; if (!q) return watching();
+    app.append(el('div', { cls: 'kick' }, `Question ${q.qi + 1} of ${q.of}` + (q.x2 ? ' · double points' : '')), el('h1', {}, q.q));
+    if (q.phase === 'read') return app.append(el('p', {}, team ? 'Get ready…' : 'Watching. One phone per table plays.'));
+    const mine = team ? get(K('a.' + q.qi)) : null;
+    if (q.phase === 'open') {
+      const bar = el('div', { cls: 'bar' }, el('i')); app.append(bar);
+      const tick = () => { const k = Math.max(0, deadline - Date.now()) / (q.dur || 20000); bar.firstChild.style.transform = `scaleX(${k})`; bar.firstChild.style.background = k < .25 ? 'var(--red)' : 'var(--aqua)'; if (k > 0) raf = requestAnimationFrame(tick); };
+      tick();
+      if (!team) return app.append(el('p', {}, 'Watching. One phone per table plays.'));
+      const btns = q.opts.map((t, i) => el('button', { cls: 'qb' + (mine != null && mine !== i ? ' dim' : ''), style: `background:${COL[i][0]};color:${COL[i][1]}`, disabled: mine != null, onclick: () => {
+        if (get(K('a.' + q.qi)) != null || Date.now() > deadline) return; put(K('a.' + q.qi), i);
+        want('ans', { t: 'a', u: U, d: team.tid, q: q.qi, a: i }, st => !st.quiz || st.quiz.qi !== q.qi || st.quiz.phase !== 'open' || (st.quiz.ack || []).includes(team.tid));
+        view = ''; render();
+      } }, el('span', { html: shape(i, 30) }), t));
+      app.append(el('div', { cls: 'qgrid' }, btns));
+      if (mine != null) app.append(el('p', {}, 'Locked in. Fingers crossed.'));
+      return;
+    }
+    /* reveal */
+    const right = q.correct, label = String.fromCharCode(65 + right) + ': ' + q.opts[right];
+    if (!team) return app.append(el('div', { cls: 'res good' }, el('div', { cls: 'kick' }, 'The answer'), el('h1', {}, label)));
+    const r = (q.res || {})[team.tid] || [0, 0, 0];
+    app.append(el('div', { cls: 'res ' + (r[0] ? 'good' : 'bad') }, el('div', { cls: 'pts' }, r[0] ? 'Correct! +' + r[0] : mine == null ? 'No answer' : 'Not this time'), el('p', {}, r[0] ? 'Nicely done.' : 'The answer was ' + label + '.')),
+      el('div', { cls: 'stat' }, el('div', {}, el('b', {}, r[1].toLocaleString('en-US')), el('span', {}, 'Total')), el('div', {}, el('b', {}, r[2] ? ord(r[2]) : '–'), el('span', {}, 'Place'))));
+  }
+  function watching() { app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', { cls: 'big' }, 'Watching.'), el('p', {}, 'One phone per table plays. Is your table not in yet?')), el('button', { cls: 'btn ghost', onclick: () => { put(K('watch'), 0); view = ''; render(); } }, 'Join for my table')); }
+  function joinTeam(s) {
+    const prev = get(K('team')) || {}; let tb = prev.tb || 0;
+    const taken = () => new Map((S.teams || []).map(t => [t[1], t[0]]));
+    const err = el('div', { cls: 'err' }), name = el('input', { type: 'text', id: 'team-name', maxlength: 24, placeholder: 'Team name (optional)', autocomplete: 'off', 'aria-label': 'Team name' }); if (prev.nm) name.value = prev.nm;
+    const join = el('button', { cls: 'btn', disabled: !tb }, 'Join the game');
+    const grid = el('div', { cls: 'tables' }); const cells = [];
+    for (let i = 1; i <= 20; i++) { const b = el('button', { cls: 'tb', 'aria-pressed': String(i === tb), 'aria-label': 'Table ' + i, onclick: () => { tb = i; err.textContent = ''; cells.forEach((c, k) => c.setAttribute('aria-pressed', String(k + 1 === tb))); join.disabled = false; } }, i); cells.push(b); grid.append(b); }
+    const paint = () => { const t = taken(), me = (get(K('team')) || {}).tid; cells.forEach((c, k) => { const owner = t.get(k + 1); c.disabled = !!owner && owner !== me; }); };
+    join.onclick = () => {
+      const t = taken(), tid = (get(K('team')) || {}).tid || LiveCore.rid(10);
+      if (t.get(tb) && t.get(tb) !== tid) { err.textContent = `Table ${tb} already has a phone in the game.`; return; }
+      const rec = { tid, tb, nm: name.value.replace(/\s+/g, ' ').trim() }; put(K('team'), rec); put(K('watch'), 0);
+      err.textContent = ''; join.disabled = true; join.textContent = 'Joining…';
+      want('join', { t: 'j', u: U, d: tid, tb, nm: rec.nm }, st => (st.teams || []).some(x => x[1] === tb));
+      setTimeout(() => { const own = taken().get(tb); if (own && own !== tid) { err.textContent = `Table ${tb} already has a phone in the game.`; join.disabled = false; join.textContent = 'Join the game'; } else if (!own) { join.disabled = false; join.textContent = 'Join the game'; err.textContent = 'Not confirmed yet. Tap Join again.'; } }, 6000);
+    };
+    app.append(el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', {}, 'One phone per table. Pick your table number.'), grid, name, err, join,
+      el('button', { cls: 'link', onclick: () => { put(K('watch'), 1); view = ''; render(); } }, 'Someone at my table is already playing. Just watch.'));
+    paint(); patchers.push(paint);
+  }
+
+  if (code.length === 6) start(); else askCode();
+})();
+</script>
+</body>
+</html>
