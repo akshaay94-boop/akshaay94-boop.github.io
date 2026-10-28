@@ -93,6 +93,8 @@ input::placeholder{color:var(--faint)}
   let link = null, S = null, lastV = 0, heard = 0, view = '', ups = 0, deadline = 0, raf = 0;
   const out = new Map(); // messages repeated until the wall confirms them
   const K = s => 'oe.' + code + '.' + s;
+  /* the wall bumps qe when the quiz is reset and poll.ep when a poll is cleared, so old answers are forgotten */
+  const QE = () => (S && S.qe) || 0, KQ = s => K('q' + QE() + '.' + s);
 
   function want(key, msg, done) { out.set(key, { msg, done }); flush(); }
   function flush() { if (!link) return; out.forEach((o, k) => { if (S && o.done(S)) out.delete(k); else link.send(o.msg); }); }
@@ -123,10 +125,10 @@ input::placeholder{color:var(--faint)}
   function onState(s) { if (!s || !s.v || s.v <= lastV) return; lastV = s.v; S = s; heard = Date.now(); if (s.quiz && s.quiz.phase === 'open') deadline = Date.now() + (s.quiz.left || 0); render(); flush(); }
 
   /* ---------- screens ---------- */
-  const myTeam = () => { const t = get(K('team')); return t && S && S.teams && S.teams.find(x => x[0] === t.tid && x[1] === t.tb) ? t : null; };
+  const myTeam = () => { const t = get(KQ('team')); return t && S && S.teams && S.teams.find(x => x[0] === t.tid && x[1] === t.tb) ? t : null; };
   function render() {
     const s = S || { mode: 'none' }, q = s.quiz || {}, team = myTeam();
-    const key = [s.mode, s.poll && s.poll.id, q.qi, q.phase, team ? 'T' : get(K('watch')) ? 'W' : '-', s.final && s.final.stage].join('|');
+    const key = [s.mode, s.poll && s.poll.id, s.poll && s.poll.ep, s.qe, q.qi, q.phase, team ? 'T' : get(KQ('watch')) ? 'W' : '-', s.final && s.final.stage].join('|');
     if (key === view) return patch();
     view = key; cancelAnimationFrame(raf); app.innerHTML = '';
     const st = document.getElementById('stale'); if (st) st.remove();
@@ -143,10 +145,10 @@ input::placeholder{color:var(--faint)}
   /* ---------- polls ---------- */
   function pollView(P) {
     patchers = [];
-    const saved = get(K('p.' + P.id)) || { s: 0 }; let sel = saved.c || [];
+    const saved = get(K('p.' + P.id + '.' + (P.ep || 0))) || { s: 0 }; let sel = saved.c || [];
     const sent = el('div', { cls: 'sent' });
-    const ack = () => { const cur = get(K('p.' + P.id)); if (!cur || !cur.s) { sent.textContent = ''; return; } const ok = (S.poll && S.poll.id === P.id && (S.poll.ack || []).includes(U + '.' + cur.s)); sent.textContent = ok ? '✓ Sent' : 'Sending…'; sent.className = 'sent' + (ok ? ' ok' : ''); };
-    const send = body => { const s = (get(K('p.' + P.id)) || { s: 0 }).s + 1; const rec = Object.assign({ s }, body); put(K('p.' + P.id), rec); const msg = Object.assign({ t: P.kind === 'open' ? 'x' : 'v', u: U, p: P.id, s }, P.kind === 'open' ? { x: body.x } : { c: body.c }); want('poll', msg, st => !st.poll || st.poll.id !== P.id || (st.poll.ack || []).includes(U + '.' + s)); ack(); };
+    const ack = () => { const cur = get(K('p.' + P.id + '.' + (P.ep || 0))); if (!cur || !cur.s) { sent.textContent = ''; return; } const ok = (S.poll && S.poll.id === P.id && (S.poll.ack || []).includes(U + '.' + cur.s)); sent.textContent = ok ? '✓ Sent' : 'Sending…'; sent.className = 'sent' + (ok ? ' ok' : ''); };
+    const send = body => { const s = (get(K('p.' + P.id + '.' + (P.ep || 0))) || { s: 0 }).s + 1; const rec = Object.assign({ s }, body); put(K('p.' + P.id + '.' + (P.ep || 0)), rec); const msg = Object.assign({ t: P.kind === 'open' ? 'x' : 'v', u: U, p: P.id, s, e: P.ep || 0 }, P.kind === 'open' ? { x: body.x } : { c: body.c }); want('poll', msg, st => !st.poll || st.poll.id !== P.id || (st.poll.ep || 0) !== (P.ep || 0) || (st.poll.ack || []).includes(U + '.' + s)); ack(); };
     app.append(el('div', { cls: 'kick' }, 'Live poll · anonymous'), el('h1', {}, P.q));
     if (P.kind === 'open') {
       const inp = el('input', { type: 'text', id: 'ans-' + P.id, maxlength: P.len || 40, placeholder: P.hint || 'Your answer', autocomplete: 'off', 'aria-label': 'Your answer' }); if (saved.x) inp.value = saved.x;
@@ -169,7 +171,7 @@ input::placeholder{color:var(--faint)}
   /* ---------- the quiz ---------- */
   function gameView(s, team) {
     patchers = [];
-    if (!team && !get(K('watch'))) return joinTeam(s);
+    if (!team && !get(KQ('watch'))) return joinTeam(s);
     if (s.mode === 'lobby') {
       if (team) return app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', { cls: 'big' }, `Table ${team.tb} is in.`), el('p', {}, (team.nm ? team.nm + '. ' : '') + 'Get ready. The fastest right answer scores the most.')));
       return watching();
@@ -182,15 +184,15 @@ input::placeholder{color:var(--faint)}
     const q = s.quiz; if (!q) return watching();
     app.append(el('div', { cls: 'kick' }, `Question ${q.qi + 1} of ${q.of}` + (q.x2 ? ' · double points' : '')), el('h1', {}, q.q));
     if (q.phase === 'read') return app.append(el('p', {}, team ? 'Get ready…' : 'Watching. One phone per table plays.'));
-    const mine = team ? get(K('a.' + q.qi)) : null;
+    const mine = team ? get(KQ('a.' + q.qi)) : null;
     if (q.phase === 'open') {
       const bar = el('div', { cls: 'bar' }, el('i')); app.append(bar);
       const tick = () => { const k = Math.max(0, deadline - Date.now()) / (q.dur || 20000); bar.firstChild.style.transform = `scaleX(${k})`; bar.firstChild.style.background = k < .25 ? 'var(--red)' : 'var(--aqua)'; if (k > 0) raf = requestAnimationFrame(tick); };
       tick();
       if (!team) return app.append(el('p', {}, 'Watching. One phone per table plays.'));
       const btns = q.opts.map((t, i) => el('button', { cls: 'qb' + (mine != null && mine !== i ? ' dim' : ''), style: `background:${COL[i][0]};color:${COL[i][1]}`, disabled: mine != null, onclick: () => {
-        if (get(K('a.' + q.qi)) != null || Date.now() > deadline) return; put(K('a.' + q.qi), i);
-        want('ans', { t: 'a', u: U, d: team.tid, q: q.qi, a: i }, st => !st.quiz || st.quiz.qi !== q.qi || st.quiz.phase !== 'open' || (st.quiz.ack || []).includes(team.tid));
+        if (get(KQ('a.' + q.qi)) != null || Date.now() > deadline) return; put(KQ('a.' + q.qi), i); const q0 = QE();
+        want('ans', { t: 'a', u: U, d: team.tid, q: q.qi, a: i, e: QE() }, st => (st.qe || 0) !== q0 || !st.quiz || st.quiz.qi !== q.qi || st.quiz.phase !== 'open' || (st.quiz.ack || []).includes(team.tid));
         view = ''; render();
       } }, el('span', { html: shape(i, 30) }), t));
       app.append(el('div', { cls: 'qgrid' }, btns));
@@ -204,25 +206,25 @@ input::placeholder{color:var(--faint)}
     app.append(el('div', { cls: 'res ' + (r[0] ? 'good' : 'bad') }, el('div', { cls: 'pts' }, r[0] ? 'Correct! +' + r[0] : mine == null ? 'No answer' : 'Not this time'), el('p', {}, r[0] ? 'Nicely done.' : 'The answer was ' + label + '.')),
       el('div', { cls: 'stat' }, el('div', {}, el('b', {}, r[1].toLocaleString('en-US')), el('span', {}, 'Total')), el('div', {}, el('b', {}, r[2] ? ord(r[2]) : '–'), el('span', {}, 'Place'))));
   }
-  function watching() { app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', { cls: 'big' }, 'Watching.'), el('p', {}, 'One phone per table plays. Is your table not in yet?')), el('button', { cls: 'btn ghost', onclick: () => { put(K('watch'), 0); view = ''; render(); } }, 'Join for my table')); }
+  function watching() { app.append(el('div', { cls: 'hero' }, el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', { cls: 'big' }, 'Watching.'), el('p', {}, 'One phone per table plays. Is your table not in yet?')), el('button', { cls: 'btn ghost', onclick: () => { put(KQ('watch'), 0); view = ''; render(); } }, 'Join for my table')); }
   function joinTeam(s) {
-    const prev = get(K('team')) || {}; let tb = prev.tb || 0;
+    const prev = get(KQ('team')) || {}; let tb = prev.tb || 0;
     const taken = () => new Map((S.teams || []).map(t => [t[1], t[0]]));
     const err = el('div', { cls: 'err' }), name = el('input', { type: 'text', id: 'team-name', maxlength: 24, placeholder: 'Team name (optional)', autocomplete: 'off', 'aria-label': 'Team name' }); if (prev.nm) name.value = prev.nm;
     const join = el('button', { cls: 'btn', disabled: !tb }, 'Join the game');
     const grid = el('div', { cls: 'tables' }); const cells = [];
     for (let i = 1; i <= 20; i++) { const b = el('button', { cls: 'tb', 'aria-pressed': String(i === tb), 'aria-label': 'Table ' + i, onclick: () => { tb = i; err.textContent = ''; cells.forEach((c, k) => c.setAttribute('aria-pressed', String(k + 1 === tb))); join.disabled = false; } }, i); cells.push(b); grid.append(b); }
-    const paint = () => { const t = taken(), me = (get(K('team')) || {}).tid; cells.forEach((c, k) => { const owner = t.get(k + 1); c.disabled = !!owner && owner !== me; }); };
+    const paint = () => { const t = taken(), me = (get(KQ('team')) || {}).tid; cells.forEach((c, k) => { const owner = t.get(k + 1); c.disabled = !!owner && owner !== me; }); };
     join.onclick = () => {
-      const t = taken(), tid = (get(K('team')) || {}).tid || LiveCore.rid(10);
+      const t = taken(), tid = (get(KQ('team')) || {}).tid || LiveCore.rid(10);
       if (t.get(tb) && t.get(tb) !== tid) { err.textContent = `Table ${tb} already has a phone in the game.`; return; }
-      const rec = { tid, tb, nm: name.value.replace(/\s+/g, ' ').trim() }; put(K('team'), rec); put(K('watch'), 0);
-      err.textContent = ''; join.disabled = true; join.textContent = 'Joining…';
-      want('join', { t: 'j', u: U, d: tid, tb, nm: rec.nm }, st => (st.teams || []).some(x => x[1] === tb));
+      const rec = { tid, tb, nm: name.value.replace(/\s+/g, ' ').trim() }; put(KQ('team'), rec); put(KQ('watch'), 0);
+      err.textContent = ''; join.disabled = true; join.textContent = 'Joining…'; const q0 = QE();
+      want('join', { t: 'j', u: U, d: tid, tb, nm: rec.nm, e: QE() }, st => (st.qe || 0) !== q0 || (st.teams || []).some(x => x[1] === tb));
       setTimeout(() => { const own = taken().get(tb); if (own && own !== tid) { err.textContent = `Table ${tb} already has a phone in the game.`; join.disabled = false; join.textContent = 'Join the game'; } else if (!own) { join.disabled = false; join.textContent = 'Join the game'; err.textContent = 'Not confirmed yet. Tap Join again.'; } }, 6000);
     };
     app.append(el('div', { cls: 'kick' }, 'The IHC Quiz'), el('h1', {}, 'One phone per table. Pick your table number.'), grid, name, err, join,
-      el('button', { cls: 'link', onclick: () => { put(K('watch'), 1); view = ''; render(); } }, 'Someone at my table is already playing. Just watch.'));
+      el('button', { cls: 'link', onclick: () => { put(KQ('watch'), 1); view = ''; render(); } }, 'Someone at my table is already playing. Just watch.'));
     paint(); patchers.push(paint);
   }
 
